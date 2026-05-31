@@ -1,0 +1,1801 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VIONIX — Affordable Innovation For Everyone</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --neon-blue: #00d4ff;
+  --neon-cyan: #00fff7;
+  --neon-purple: #7b2fff;
+  --dark-bg: #020408;
+  --dark-surface: #060d14;
+  --dark-card: #0a1628;
+  --silver: #a8b8cc;
+  --silver-light: #d0dce8;
+  --glow-blue: 0 0 20px #00d4ff80, 0 0 40px #00d4ff40, 0 0 80px #00d4ff20;
+  --glow-cyan: 0 0 20px #00fff780, 0 0 40px #00fff740;
+  --glow-intense: 0 0 30px #00d4ffaa, 0 0 60px #00d4ff66, 0 0 120px #00d4ff33;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--dark-bg);
+  color: var(--silver-light);
+  font-family: 'Rajdhani', sans-serif;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* CUSTOM CURSOR */
+#cursor-outer {
+  display: none;
+}
+#cursor-inner {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--neon-blue);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  box-shadow: var(--glow-blue);
+}
+
+/* INTRO SCREEN */
+#intro {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#intro-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+}
+
+#logo-container {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+}
+
+#intro-logo-text {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(3rem, 10vw, 8rem);
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  background: linear-gradient(135deg, #fff 0%, var(--neon-cyan) 40%, var(--neon-blue) 70%, #fff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0;
+  filter: drop-shadow(0 0 30px var(--neon-blue)) drop-shadow(0 0 60px var(--neon-cyan));
+}
+
+#intro-tagline {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: clamp(0.7rem, 2vw, 1rem);
+  letter-spacing: 0.5em;
+  color: var(--neon-cyan);
+  margin-top: 1.5rem;
+  opacity: 0;
+  text-shadow: 0 0 20px var(--neon-cyan);
+}
+
+#intro-bar {
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-blue), transparent);
+  margin: 1.5rem auto 0;
+  box-shadow: var(--glow-cyan);
+}
+
+/* SCANLINE OVERLAY */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,212,255,0.015) 2px,
+    rgba(0,212,255,0.015) 4px
+  );
+  pointer-events: none;
+  z-index: 10000;
+}
+
+/* NAVBAR */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 1rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(2,4,8,0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0,212,255,0.15);
+  transform: translateY(-100%);
+}
+
+.nav-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  background: linear-gradient(90deg, var(--neon-blue), var(--neon-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 0 10px var(--neon-blue));
+}
+
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--silver);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 1px;
+  background: var(--neon-cyan);
+  box-shadow: var(--glow-cyan);
+  transition: width 0.3s;
+}
+.nav-links a:hover { color: var(--neon-cyan); }
+.nav-links a:hover::after { width: 100%; }
+
+.nav-cta {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  padding: 0.5rem 1.5rem;
+  border: 1px solid var(--neon-blue);
+  color: var(--neon-blue);
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+}
+.nav-cta:hover {
+  background: var(--neon-blue);
+  color: #000;
+  box-shadow: var(--glow-blue);
+}
+
+/* HAMBURGER */
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+.hamburger span { width: 25px; height: 2px; background: var(--neon-cyan); display: block; transition: all 0.3s; }
+
+/* HERO SECTION */
+#hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding-top: 80px;
+}
+
+#hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  max-width: 900px;
+  padding: 2rem;
+}
+
+.hero-eyebrow {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.5em;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+}
+
+.hero-title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(2rem, 6vw, 5rem);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+}
+.hero-title .line1 {
+  background: linear-gradient(135deg, #fff 0%, var(--silver-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: block;
+}
+.hero-title .line2 {
+  background: linear-gradient(90deg, var(--neon-blue), var(--neon-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px var(--neon-blue));
+  display: block;
+}
+
+.hero-sub {
+  font-size: 1.1rem;
+  color: var(--silver);
+  max-width: 600px;
+  margin: 0 auto 3rem;
+  line-height: 1.6;
+  opacity: 0;
+}
+
+.hero-buttons { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; opacity: 0; }
+
+.btn-primary {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  padding: 1rem 2.5rem;
+  background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+  color: #000;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+  clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+  transition: all 0.3s;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary:hover {
+  box-shadow: var(--glow-blue);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  padding: 1rem 2.5rem;
+  background: transparent;
+  color: var(--neon-cyan);
+  border: 1px solid var(--neon-cyan);
+  text-decoration: none;
+  cursor: pointer;
+  clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+  transition: all 0.3s;
+  text-transform: uppercase;
+}
+.btn-secondary:hover {
+  background: rgba(0,255,247,0.1);
+  box-shadow: var(--glow-cyan);
+  transform: translateY(-2px);
+}
+
+/* SCROLL INDICATOR */
+.scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  animation: fadeIn 1s 4s forwards;
+}
+.scroll-line {
+  width: 1px; height: 60px;
+  background: linear-gradient(180deg, var(--neon-cyan), transparent);
+  animation: scrollPulse 2s infinite;
+}
+.scroll-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  color: var(--silver);
+}
+
+@keyframes scrollPulse {
+  0%,100% { opacity: 0.3; transform: scaleY(1); }
+  50% { opacity: 1; transform: scaleY(1.2); }
+}
+@keyframes fadeIn { to { opacity: 1; } }
+
+/* SECTION STYLES */
+section { padding: 6rem 2rem; }
+
+.section-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.5em;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.section-label::before {
+  content: '';
+  width: 40px; height: 1px;
+  background: var(--neon-cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+.section-title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 800;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #fff, var(--silver-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.container { max-width: 1200px; margin: 0 auto; }
+
+/* ABOUT */
+#about {
+  background: var(--dark-surface);
+  position: relative;
+  overflow: hidden;
+}
+#about::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -20%;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0,212,255,0.05), transparent 70%);
+  pointer-events: none;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  margin-top: 3rem;
+}
+
+.about-text p {
+  color: var(--silver);
+  line-height: 1.8;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.about-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background: rgba(0,212,255,0.05);
+  border: 1px solid rgba(0,212,255,0.2);
+  padding: 1.5rem;
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,212,255,0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.stat-card:hover { border-color: var(--neon-cyan); box-shadow: var(--glow-cyan); }
+.stat-card:hover::before { opacity: 1; }
+
+.stat-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(90deg, var(--neon-blue), var(--neon-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 10px var(--neon-blue));
+}
+.stat-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--silver);
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+
+/* SERVICES */
+#services { position: relative; }
+#services::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 80% 50%, rgba(0,212,255,0.03), transparent 60%);
+  pointer-events: none;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.service-card {
+  background: rgba(6,13,20,0.8);
+  border: 1px solid rgba(0,212,255,0.15);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s;
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  backdrop-filter: blur(10px);
+}
+.service-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+.service-card:hover { border-color: rgba(0,212,255,0.5); transform: translateY(-5px); box-shadow: 0 20px 60px rgba(0,212,255,0.1); }
+.service-card:hover::before { transform: translateX(100%); }
+
+.service-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+  filter: drop-shadow(0 0 10px var(--neon-blue));
+}
+.service-num {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  color: rgba(0,212,255,0.4);
+  margin-bottom: 0.5rem;
+}
+.service-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.75rem;
+}
+.service-desc {
+  color: var(--silver);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.service-tag {
+  display: inline-block;
+  margin-top: 1rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid rgba(0,212,255,0.3);
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+}
+
+/* PROJECTS */
+#projects { background: var(--dark-surface); }
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.project-card {
+  background: var(--dark-card);
+  border: 1px solid rgba(0,212,255,0.1);
+  overflow: hidden;
+  position: relative;
+  transition: all 0.4s;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+}
+.project-card:hover { border-color: rgba(0,212,255,0.4); transform: translateY(-8px); box-shadow: 0 30px 80px rgba(0,212,255,0.12); }
+
+.project-visual {
+  height: 180px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.project-card:nth-child(1) .project-visual { background: linear-gradient(135deg, #020c18, #003366); }
+.project-card:nth-child(2) .project-visual { background: linear-gradient(135deg, #020c14, #002244); }
+.project-card:nth-child(3) .project-visual { background: linear-gradient(135deg, #020810, #001833); }
+.project-card:nth-child(4) .project-visual { background: linear-gradient(135deg, #060a14, #0a1528); }
+.project-card:nth-child(5) .project-visual { background: linear-gradient(135deg, #040810, #091224); }
+.project-card:nth-child(6) .project-visual { background: linear-gradient(135deg, #020a10, #001a2e); }
+
+.project-icon-big {
+  font-size: 4rem;
+  filter: drop-shadow(0 0 20px var(--neon-blue));
+  animation: floatIcon 4s ease-in-out infinite;
+}
+@keyframes floatIcon {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.project-glow {
+  position: absolute;
+  width: 150px; height: 150px;
+  background: radial-gradient(circle, rgba(0,212,255,0.15), transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+
+.project-info { padding: 1.5rem; }
+.project-category {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.project-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+.project-desc { color: var(--silver); font-size: 0.85rem; line-height: 1.5; }
+
+.project-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0,212,255,0.1);
+}
+.project-price {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--neon-cyan);
+}
+.project-link {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: var(--neon-blue);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.3s;
+}
+.project-link:hover { color: var(--neon-cyan); gap: 0.8rem; }
+
+/* WHY CHOOSE */
+#why { position: relative; overflow: hidden; }
+#why::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(0,212,255,0.03), transparent 60%);
+  pointer-events: none;
+}
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.why-card {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: rgba(10,22,40,0.6);
+  border: 1px solid rgba(0,212,255,0.1);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s;
+  backdrop-filter: blur(10px);
+}
+.why-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,212,255,0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.why-card:hover { border-color: rgba(0,212,255,0.4); transform: translateY(-5px); box-shadow: 0 20px 60px rgba(0,212,255,0.08); }
+.why-card:hover::before { opacity: 1; }
+
+.why-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  display: block;
+  filter: drop-shadow(0 0 15px var(--neon-blue));
+}
+.why-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.75rem;
+}
+.why-desc { color: var(--silver); font-size: 0.85rem; line-height: 1.6; }
+
+/* FOUNDER */
+#founder { background: var(--dark-surface); }
+
+.founder-wrapper {
+  max-width: 700px;
+  margin: 3rem auto 0;
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+  padding: 3rem;
+  background: rgba(6,13,20,0.9);
+  border: 1px solid rgba(0,212,255,0.2);
+  clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px));
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+.founder-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--neon-blue), var(--neon-cyan), transparent);
+}
+.founder-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 50%, rgba(0,212,255,0.05), transparent 60%);
+  pointer-events: none;
+}
+
+.founder-avatar {
+  flex-shrink: 0;
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  border: 2px solid var(--neon-blue);
+  box-shadow: var(--glow-blue);
+  background: linear-gradient(135deg, var(--dark-card), #001a33);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Orbitron', monospace;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--neon-cyan);
+  text-shadow: var(--glow-cyan);
+  position: relative;
+}
+.founder-avatar::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,212,255,0.2);
+  animation: rotateBorder 8s linear infinite;
+}
+@keyframes rotateBorder {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.founder-details { flex: 1; position: relative; z-index: 1; }
+.founder-role {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.4em;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.founder-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+.founder-bio { color: var(--silver); font-size: 0.9rem; line-height: 1.7; }
+
+.founder-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1.5rem; }
+.f-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid rgba(0,212,255,0.25);
+  color: var(--neon-cyan);
+  background: rgba(0,212,255,0.05);
+}
+
+/* CONTACT */
+#contact {
+  background: linear-gradient(180deg, var(--dark-bg) 0%, var(--dark-surface) 100%);
+  position: relative;
+}
+#contact::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 300px;
+  background: radial-gradient(ellipse, rgba(0,212,255,0.06), transparent 70%);
+  pointer-events: none;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  margin-top: 3rem;
+}
+
+.contact-info h3 {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+.contact-info p { color: var(--silver); font-size: 0.95rem; line-height: 1.7; margin-bottom: 2rem; }
+
+.contact-detail {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(0,212,255,0.04);
+  border: 1px solid rgba(0,212,255,0.1);
+  transition: all 0.3s;
+}
+.contact-detail:hover { border-color: rgba(0,212,255,0.3); box-shadow: var(--glow-cyan); }
+.contact-detail-icon { font-size: 1.2rem; }
+.contact-detail-text { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--silver); }
+
+.contact-form { display: flex; flex-direction: column; gap: 1rem; }
+
+.form-group { position: relative; }
+.form-group label {
+  display: block;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  color: var(--neon-cyan);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  background: rgba(6,13,20,0.9);
+  border: 1px solid rgba(0,212,255,0.2);
+  color: var(--silver-light);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.95rem;
+  padding: 0.75rem 1rem;
+  outline: none;
+  transition: all 0.3s;
+  
+}
+.form-group select option { background: var(--dark-card); }
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 20px rgba(0,212,255,0.15);
+  background: rgba(0,20,40,0.9);
+}
+.form-group textarea { resize: vertical; min-height: 120px; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.submit-btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+  color: #000;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.submit-btn:hover { box-shadow: var(--glow-blue); transform: translateY(-2px); }
+.submit-btn::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+.submit-btn:hover::after { left: 100%; }
+
+/* FOOTER */
+footer {
+  background: #000;
+  border-top: 1px solid rgba(0,212,255,0.15);
+  padding: 4rem 2rem 2rem;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 3rem;
+  max-width: 1200px;
+  margin: 0 auto 3rem;
+}
+
+.footer-brand .logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  background: linear-gradient(90deg, var(--neon-blue), var(--neon-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 15px var(--neon-blue));
+  display: block;
+  margin-bottom: 1rem;
+}
+.footer-brand p { color: var(--silver); font-size: 0.9rem; line-height: 1.6; max-width: 280px; }
+
+.footer-col h4 {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--neon-cyan);
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+}
+.footer-col ul { list-style: none; }
+.footer-col ul li { margin-bottom: 0.75rem; }
+.footer-col ul li a {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--silver);
+  text-decoration: none;
+  letter-spacing: 0.1em;
+  transition: color 0.3s;
+}
+.footer-col ul li a:hover { color: var(--neon-cyan); }
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(0,212,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.footer-bottom p {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: rgba(168,184,204,0.5);
+}
+
+.social-links { display: flex; gap: 1rem; }
+.social-link {
+  width: 36px; height: 36px;
+  border: 1px solid rgba(0,212,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: var(--silver);
+  text-decoration: none;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.social-link:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); box-shadow: var(--glow-cyan); }
+
+/* ANIMATIONS & EFFECTS */
+.glow-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon-blue), var(--neon-cyan), var(--neon-blue), transparent);
+  box-shadow: 0 0 10px var(--neon-blue);
+  margin: 0;
+}
+
+.reveal-up { opacity: 0; transform: translateY(40px); }
+
+.corner-tl, .corner-br {
+  position: absolute;
+  width: 20px; height: 20px;
+  border-color: var(--neon-cyan);
+  border-style: solid;
+  opacity: 0.5;
+}
+.corner-tl { top: 1rem; left: 1rem; border-width: 2px 0 0 2px; }
+.corner-br { bottom: 1rem; right: 1rem; border-width: 0 2px 2px 0; }
+
+/* MOBILE NAV */
+#mobile-nav {
+  display: none;
+  position: fixed;
+  top: 0; right: -100%;
+  width: 280px;
+  height: 100vh;
+  background: rgba(2,4,8,0.98);
+  backdrop-filter: blur(20px);
+  border-left: 1px solid rgba(0,212,255,0.2);
+  z-index: 9998;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem;
+  transition: right 0.4s ease;
+}
+#mobile-nav.open { right: 0; }
+#mobile-nav ul { list-style: none; }
+#mobile-nav ul li { margin: 1.5rem 0; }
+#mobile-nav ul li a {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem;
+  color: var(--silver-light);
+  text-decoration: none;
+  letter-spacing: 0.1em;
+  transition: color 0.3s;
+}
+#mobile-nav ul li a:hover { color: var(--neon-cyan); }
+
+@media (max-width: 768px) {
+  nav { padding: 1rem 1.5rem; }
+  .nav-links { display: none; }
+  .nav-cta { display: none; }
+  .hamburger { display: flex; }
+  #mobile-nav { display: flex; }
+  .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .founder-wrapper { flex-direction: column; text-align: center; padding: 2rem; }
+  .hero-buttons { flex-direction: column; align-items: center; }
+  .footer-bottom { flex-direction: column; text-align: center; }
+}
+
+/* NOTIFICATION */
+#notify {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: rgba(6,13,20,0.95);
+  border: 1px solid var(--neon-cyan);
+  padding: 1rem 1.5rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--neon-cyan);
+  box-shadow: var(--glow-cyan);
+  z-index: 9000;
+  transform: translateX(200%);
+  transition: transform 0.4s;
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+}
+#notify.show { transform: translateX(0); }
+
+/* CIRCUIT BG PATTERN */
+.circuit-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<!-- SCANLINES -->
+<div class="scanlines"></div>
+
+<!-- CUSTOM CURSOR -->
+<div id="cursor-outer"></div>
+<div id="cursor-inner"></div>
+
+<!-- NOTIFICATION -->
+<div id="notify">⚡ MESSAGE TRANSMITTED SUCCESSFULLY</div>
+
+<!-- INTRO SCREEN -->
+<div id="intro">
+  <canvas id="intro-canvas"></canvas>
+  <div id="logo-container">
+    <div id="intro-logo-text">VIONIX</div>
+    <div id="intro-bar"></div>
+    <div id="intro-tagline">CONNECT &bull; AUTOMATE &bull; INNOVATE</div>
+  </div>
+</div>
+
+<!-- MOBILE NAV -->
+<div id="mobile-nav">
+  <ul>
+    <li><a href="#about" onclick="closeMobileNav()">About</a></li>
+    <li><a href="#services" onclick="closeMobileNav()">Services</a></li>
+    <li><a href="#projects" onclick="closeMobileNav()">Projects</a></li>
+    <li><a href="#why" onclick="closeMobileNav()">Why Us</a></li>
+    <li><a href="#founder" onclick="closeMobileNav()">Founder</a></li>
+    <li><a href="#contact" onclick="closeMobileNav()">Contact</a></li>
+  </ul>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <div class="nav-logo">VIONIX</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#why">Why Us</a></li>
+    <li><a href="#founder">Founder</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Get a Quote</a>
+  <div class="hamburger" id="hamburger" onclick="toggleMobileNav()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="circuit-bg"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">// Next-Gen Technology Solutions</div>
+    <h1 class="hero-title">
+      <span class="line1">Affordable Innovation</span>
+      <span class="line2">For Everyone</span>
+    </h1>
+    <p class="hero-sub">We build customized AI, IoT, robotics, and smart technology solutions at low cost for students, creators, and businesses.</p>
+    <div class="hero-buttons">
+      <a href="#projects" class="btn-primary">⚡ Explore Projects</a>
+      <a href="#contact" class="btn-secondary">🔧 Build Your Product</a>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span class="scroll-text">SCROLL</span>
+  </div>
+</section>
+
+<div class="glow-line"></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="section-label">01 // About</div>
+    <h2 class="section-title reveal-up">Who We Are</h2>
+    <div class="about-grid">
+      <div class="about-text reveal-up">
+        <p>VIONIX is a forward-thinking tech innovation studio dedicated to making cutting-edge technology accessible to everyone. We design, build, and deploy customized AI, IoT, and robotics solutions tailored specifically to your needs — without the premium price tag.</p>
+        <p>From students building their first smart project to entrepreneurs launching the next big product, VIONIX bridges the gap between imagination and implementation. Our team merges deep technical expertise with creative engineering to deliver solutions that feel like they're from the future.</p>
+        <p>We believe innovation shouldn't be limited by budget. That's why every VIONIX product is engineered for maximum impact at minimum cost.</p>
+      </div>
+      <div class="about-stats reveal-up">
+        <div class="stat-card">
+          <div class="stat-num">200+</div>
+          <div class="stat-label">Projects Delivered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">100+</div>
+          <div class="stat-label">Happy Clients</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">50%</div>
+          <div class="stat-label">Lower Cost</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">7+</div>
+          <div class="stat-label">Tech Domains</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="glow-line"></div>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="container">
+    <div class="section-label">02 // Services</div>
+    <h2 class="section-title reveal-up">What We Build</h2>
+    <div class="services-grid">
+      <div class="service-card reveal-up">
+        <span class="service-icon">🌐</span>
+        <div class="service-num">SVC_01</div>
+        <div class="service-name">Custom IoT Projects</div>
+        <p class="service-desc">Smart sensors, connected devices, and real-time data systems. We design IoT ecosystems from concept to deployment with full cloud integration.</p>
+        <span class="service-tag">Hardware + Cloud</span>
+      </div>
+      <div class="service-card reveal-up">
+        <span class="service-icon">🤖</span>
+        <div class="service-num">SVC_02</div>
+        <div class="service-name">Robotics Systems</div>
+        <p class="service-desc">Custom robotic arms, autonomous navigation bots, and industrial automation machines built for precision and reliability.</p>
+        <span class="service-tag">Mechanical + Code</span>
+      </div>
+      <div class="service-card reveal-up">
+        <span class="service-icon">⚡</span>
+        <div class="service-num">SVC_03</div>
+        <div class="service-name">Smart Automation</div>
+        <p class="service-desc">Home automation, industrial process control, smart energy systems — we make your environment intelligent and efficient.</p>
+        <span class="service-tag">Control Systems</span>
+      </div>
+      <div class="service-card reveal-up">
+        <span class="service-icon">🧠</span>
+        <div class="service-num">SVC_04</div>
+        <div class="service-name">AI-Based Systems</div>
+        <p class="service-desc">Machine learning models, computer vision, NLP, and predictive analytics. We embed AI into products that think, adapt, and evolve.</p>
+        <span class="service-tag">ML + Vision</span>
+      </div>
+      <div class="service-card reveal-up">
+        <span class="service-icon">💻</span>
+        <div class="service-num">SVC_05</div>
+        <div class="service-name">Web Development</div>
+        <p class="service-desc">Futuristic, high-performance websites and web apps with stunning UI/UX, built for speed and conversion.</p>
+        <span class="service-tag">React + Backend</span>
+      </div>
+      <div class="service-card reveal-up">
+        <span class="service-icon">📱</span>
+        <div class="service-num">SVC_06</div>
+        <div class="service-name">App Development</div>
+        <p class="service-desc">Native and cross-platform mobile applications with IoT integration, AI features, and seamless user experiences.</p>
+        <span class="service-tag">iOS + Android</span>
+      </div>
+      <div class="service-card reveal-up">
+        <span class="service-icon">🔌</span>
+        <div class="service-num">SVC_07</div>
+        <div class="service-name">Embedded Systems</div>
+        <p class="service-desc">Custom firmware, microcontroller programming, PCB design, and low-level hardware engineering for any application.</p>
+        <span class="service-tag">Arduino + RTOS</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="glow-line"></div>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="container">
+    <div class="section-label">03 // Projects</div>
+    <h2 class="section-title reveal-up">Featured Innovations</h2>
+    <div class="projects-grid">
+      <div class="project-card reveal-up">
+        <div class="project-visual">
+          <div class="project-glow"></div>
+          <span class="project-icon-big">🌡️</span>
+        </div>
+        <div class="project-info">
+          <div class="project-category">IoT &bull; Smart Home</div>
+          <div class="project-title">AuraEnv — Smart Environment Monitor</div>
+          <p class="project-desc">Multi-sensor IoT hub measuring air quality, temperature, humidity, and CO₂ with real-time mobile dashboard.</p>
+          <div class="project-footer">
+            <span class="project-price">From ₹1,499</span>
+            <a href="#contact" class="project-link">BUILD THIS →</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-card reveal-up">
+        <div class="project-visual">
+          <div class="project-glow"></div>
+          <span class="project-icon-big">🦾</span>
+        </div>
+        <div class="project-info">
+          <div class="project-category">Robotics &bull; Automation</div>
+          <div class="project-title">NexoArm — 5-DOF Robotic Arm</div>
+          <p class="project-desc">Programmable robotic arm with computer vision, precise servo control, and Python/ROS integration for education and prototyping.</p>
+          <div class="project-footer">
+            <span class="project-price">From ₹4,999</span>
+            <a href="#contact" class="project-link">BUILD THIS →</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-card reveal-up">
+        <div class="project-visual">
+          <div class="project-glow"></div>
+          <span class="project-icon-big">🔐</span>
+        </div>
+        <div class="project-info">
+          <div class="project-category">AI &bull; Security</div>
+          <div class="project-title">VisionLock — AI Access Control</div>
+          <p class="project-desc">Face-recognition based smart door system with 99.2% accuracy, cloud logs, and mobile alerts.</p>
+          <div class="project-footer">
+            <span class="project-price">From ₹2,999</span>
+            <a href="#contact" class="project-link">BUILD THIS →</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-card reveal-up">
+        <div class="project-visual">
+          <div class="project-glow"></div>
+          <span class="project-icon-big">🚗</span>
+        </div>
+        <div class="project-info">
+          <div class="project-category">Autonomous &bull; Navigation</div>
+          <div class="project-title">AutoDrive — Obstacle Avoidance Bot</div>
+          <p class="project-desc">Autonomous navigation robot using ultrasonic + IR sensors, real-time mapping, and remote override capability.</p>
+          <div class="project-footer">
+            <span class="project-price">From ₹2,199</span>
+            <a href="#contact" class="project-link">BUILD THIS →</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-card reveal-up">
+        <div class="project-visual">
+          <div class="project-glow"></div>
+          <span class="project-icon-big">🌿</span>
+        </div>
+        <div class="project-info">
+          <div class="project-category">IoT &bull; AgriTech</div>
+          <div class="project-title">GreenNode — Smart Farm Controller</div>
+          <p class="project-desc">Soil moisture monitoring, automated irrigation, and weather-based scheduling for precision agriculture.</p>
+          <div class="project-footer">
+            <span class="project-price">From ₹3,499</span>
+            <a href="#contact" class="project-link">BUILD THIS →</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-card reveal-up">
+        <div class="project-visual">
+          <div class="project-glow"></div>
+          <span class="project-icon-big">💬</span>
+        </div>
+        <div class="project-info">
+          <div class="project-category">AI &bull; Web</div>
+          <div class="project-title">SynthBot — Custom AI Assistant</div>
+          <p class="project-desc">Domain-trained conversational AI with custom knowledge base, voice interface, and seamless website integration.</p>
+          <div class="project-footer">
+            <span class="project-price">From ₹1,999</span>
+            <a href="#contact" class="project-link">BUILD THIS →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="glow-line"></div>
+
+<!-- WHY -->
+<section id="why">
+  <div class="container">
+    <div class="section-label">04 // Why VIONIX</div>
+    <h2 class="section-title reveal-up">Built Different</h2>
+    <div class="why-grid">
+      <div class="why-card reveal-up">
+        <span class="why-icon">💰</span>
+        <div class="why-title">Ultra Low Cost</div>
+        <p class="why-desc">We engineer affordable solutions without compromising quality. Access premium tech at a fraction of market price.</p>
+      </div>
+      <div class="why-card reveal-up">
+        <span class="why-icon">🔬</span>
+        <div class="why-title">True Innovation</div>
+        <p class="why-desc">We don't template — we create. Every product is custom-engineered from scratch to solve your exact problem.</p>
+      </div>
+      <div class="why-card reveal-up">
+        <span class="why-icon">⚡</span>
+        <div class="why-title">Fast Delivery</div>
+        <p class="why-desc">Rapid prototyping and agile development cycles ensure you get working products faster than traditional agencies.</p>
+      </div>
+      <div class="why-card reveal-up">
+        <span class="why-icon">🛸</span>
+        <div class="why-title">Modern Technology</div>
+        <p class="why-desc">We use cutting-edge stacks — from edge AI to MQTT protocols — ensuring your product is future-proof from day one.</p>
+      </div>
+      <div class="why-card reveal-up">
+        <span class="why-icon">🎛️</span>
+        <div class="why-title">Full Customization</div>
+        <p class="why-desc">No one-size-fits-all. You define the requirements, we engineer the exact solution — hardware, firmware, and software.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="glow-line"></div>
+
+<!-- FOUNDER -->
+<section id="founder" style="position:relative;">
+  <div class="container" style="text-align:center;">
+    <div class="section-label" style="justify-content:center;">05 // Founder</div>
+    <h2 class="section-title reveal-up">The Mind Behind VIONIX</h2>
+    <div class="founder-wrapper reveal-up">
+      <div class="corner-tl"></div>
+      <div class="corner-br"></div>
+      <div class="founder-avatar">UK</div>
+      <div class="founder-details">
+        <div class="founder-role">// Founder &amp; CEO</div>
+        <div class="founder-name">Utkarsh Khasne</div>
+        <p class="founder-bio">A visionary engineer and tech innovator, Utkarsh founded VIONIX with one mission: to democratize cutting-edge technology. With deep expertise spanning embedded systems, AI, and IoT architecture, he leads VIONIX's mission to build affordable futuristic products that empower students, creators, and businesses to build the future — today.</p>
+        <div class="founder-tags">
+          <span class="f-tag">AI/ML</span>
+          <span class="f-tag">IoT Architect</span>
+          <span class="f-tag">Embedded Systems</span>
+          <span class="f-tag">Robotics</span>
+          <span class="f-tag">Product Design</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="glow-line"></div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="section-label">06 // Contact</div>
+    <h2 class="section-title reveal-up">Initiate Project</h2>
+    <div class="contact-grid">
+      <div class="reveal-up">
+        <h3>Let's Build Something Amazing</h3>
+        <p>Have a project idea? Need a custom tech solution? Whether you're a student, startup, or enterprise — VIONIX is ready to engineer your vision into reality at a price that makes sense.</p>
+        <div class="contact-detail">
+          <span class="contact-detail-icon">📧</span>
+          <span class="contact-detail-text">vionixtech@gmail.com</span>
+        </div>
+        <div class="contact-detail">
+          <span class="contact-detail-icon">📍</span>
+          <span class="contact-detail-text">India — Serving Globally</span>
+        </div>
+        <div class="contact-detail">
+          <span class="contact-detail-icon">⚡</span>
+          <span class="contact-detail-text">Response within 24 hours</span>
+        </div>
+      </div>
+      <form class="contact-form reveal-up" id="contact-form" action="https://formspree.io/f/xbdbpeyv" method="POST">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Your Name</label>
+            <input type="text" name="name" id="f-name" placeholder="Utkarsh Khasne"/>
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" name="email" id="f-email" placeholder="you@example.com"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Service Required</label>
+          <select name="service" id="f-service">
+            <option value="">Select a service...</option>
+            <option>Custom IoT Project</option>
+            <option>Robotics System</option>
+            <option>Smart Automation</option>
+            <option>AI-Based System</option>
+            <option>Web Development</option>
+            <option>App Development</option>
+            <option>Embedded Systems</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Project Description</label>
+          <textarea name="message" id="f-message" placeholder="Describe your project idea, requirements, and budget range..."></textarea>
+        </div>
+        <input type="hidden" name="_replyto" id="f-replyto"/><input type="hidden" name="_subject" value="New VIONIX Project Inquiry!"/><button type="submit" class="submit-btn">⚡ TRANSMIT MESSAGE</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="logo">VIONIX</span>
+      <p>Affordable futuristic technology solutions. We build AI, IoT, robotics, and smart systems for everyone — students, creators, and businesses.</p>
+      <div class="social-links" style="margin-top:1.5rem;">
+        <a class="social-link" title="Instagram" href="https://instagram.com/utkarsh_khasne" target="_blank">ig</a>
+        <a class="social-link" title="Twitter / X" href="https://x.com/utkarsh_khasne" target="_blank">𝕏</a>
+        <a class="social-link" title="Snapchat" href="https://snapchat.com/add/utkarsh_khasne" target="_blank">👻</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="#services">Custom IoT</a></li>
+        <li><a href="#services">Robotics</a></li>
+        <li><a href="#services">Smart Automation</a></li>
+        <li><a href="#services">AI Systems</a></li>
+        <li><a href="#services">Web & App Dev</a></li>
+        <li><a href="#services">Embedded Systems</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Navigation</h4>
+      <ul>
+        <li><a href="#about">About VIONIX</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#why">Why Choose Us</a></li>
+        <li><a href="#founder">Founder</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="#contact">Get a Quote</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 VIONIX. ALL RIGHTS RESERVED. DESIGNED FOR THE FUTURE.</p>
+    <p style="color:rgba(0,212,255,0.4);">CONNECT • AUTOMATE • INNOVATE</p>
+  </div>
+</footer>
+
+<script>
+// ============================================================
+// CUSTOM CURSOR
+// ============================================================
+const cursorOuter = document.getElementById('cursor-outer');
+const cursorInner = document.getElementById('cursor-inner');
+let mouseX = 0, mouseY = 0, outerX = 0, outerY = 0;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  cursorInner.style.left = mouseX + 'px';
+  cursorInner.style.top = mouseY + 'px';
+});
+
+function animateCursor() {
+  outerX += (mouseX - outerX) * 0.12;
+  outerY += (mouseY - outerY) * 0.12;
+  cursorOuter.style.left = outerX + 'px';
+  cursorOuter.style.top = outerY + 'px';
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+document.querySelectorAll('a, button, .service-card, .project-card, .why-card').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursorOuter.style.transform = 'translate(-50%,-50%) scale(1.8)'; cursorOuter.style.borderColor = '#00fff7'; });
+  el.addEventListener('mouseleave', () => { cursorOuter.style.transform = 'translate(-50%,-50%) scale(1)'; cursorOuter.style.borderColor = '#00fff7'; });
+});
+
+// ============================================================
+// INTRO PARTICLE CANVAS
+// ============================================================
+const introCanvas = document.getElementById('intro-canvas');
+const ctx = introCanvas.getContext('2d');
+
+function resizeIntro() {
+  introCanvas.width = window.innerWidth;
+  introCanvas.height = window.innerHeight;
+}
+resizeIntro();
+window.addEventListener('resize', resizeIntro);
+
+const particles = [];
+for (let i = 0; i < 200; i++) {
+  particles.push({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    vx: (Math.random() - 0.5) * 0.5,
+    vy: (Math.random() - 0.5) * 0.5,
+    size: Math.random() * 2 + 0.5,
+    alpha: Math.random(),
+    hue: Math.random() > 0.5 ? 195 : 180
+  });
+}
+
+function drawIntroParticles() {
+  ctx.clearRect(0, 0, introCanvas.width, introCanvas.height);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    p.alpha += (Math.random() - 0.5) * 0.02;
+    p.alpha = Math.max(0.1, Math.min(1, p.alpha));
+    if (p.x < 0) p.x = introCanvas.width;
+    if (p.x > introCanvas.width) p.x = 0;
+    if (p.y < 0) p.y = introCanvas.height;
+    if (p.y > introCanvas.height) p.y = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue}, 100%, 70%, ${p.alpha * 0.6})`;
+    ctx.fill();
+  });
+  // Draw connecting lines
+  particles.forEach((p, i) => {
+    particles.slice(i + 1, i + 5).forEach(p2 => {
+      const d = Math.hypot(p.x - p2.x, p.y - p2.y);
+      if (d < 100) {
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = `rgba(0,212,255,${(1 - d / 100) * 0.15})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    });
+  });
+}
+
+let introAnim = requestAnimationFrame(function loop() {
+  drawIntroParticles();
+  introAnim = requestAnimationFrame(loop);
+});
+
+// ============================================================
+// INTRO SEQUENCE
+// ============================================================
+function runIntro() {
+  const logoText = document.getElementById('intro-logo-text');
+  const tagline = document.getElementById('intro-tagline');
+  const bar = document.getElementById('intro-bar');
+  const intro = document.getElementById('intro');
+
+  const tl = gsap.timeline();
+
+  // Logo assemble
+  tl.to(logoText, { opacity: 1, duration: 1.5, ease: 'power2.out', delay: 0.5,
+    textShadow: '0 0 60px #00d4ff, 0 0 120px #00d4ff80' })
+    .to(bar, { width: '300px', duration: 1, ease: 'power2.out' }, '-=0.5')
+    .to(tagline, { opacity: 1, duration: 0.8, ease: 'power2.out' }, '-=0.3')
+    // Hold
+    .to({}, { duration: 1 })
+    // Fade out intro
+    .to(intro, {
+      opacity: 0, duration: 1, ease: 'power2.inOut',
+      onComplete: () => {
+        intro.style.display = 'none';
+        cancelAnimationFrame(introAnim);
+        runMainAnimations();
+      }
+    });
+}
+
+// ============================================================
+// MAIN PAGE ANIMATIONS
+// ============================================================
+function runMainAnimations() {
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Reveal navbar
+  gsap.to('#navbar', { y: 0, duration: 0.8, ease: 'power2.out', delay: 0.2 });
+
+  // Hero animations
+  gsap.to('.hero-eyebrow', { opacity: 1, y: 0, duration: 0.8, delay: 0.3 });
+  gsap.to('.hero-title', { opacity: 1, y: 0, duration: 1, delay: 0.5 });
+  gsap.to('.hero-sub', { opacity: 1, y: 0, duration: 0.8, delay: 0.7 });
+  gsap.to('.hero-buttons', { opacity: 1, y: 0, duration: 0.8, delay: 0.9 });
+
+  // Scroll-triggered reveals
+  gsap.utils.toArray('.reveal-up').forEach(el => {
+    gsap.to(el, {
+      opacity: 1, y: 0, duration: 0.8, ease: 'power2.out',
+      scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' }
+    });
+  });
+
+  // Start hero canvas
+  initHeroCanvas();
+}
+
+// ============================================================
+// HERO THREE.JS CANVAS
+// ============================================================
+function initHeroCanvas() {
+  const canvas = document.getElementById('hero-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+  camera.position.z = 30;
+
+  function resize() {
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Particles
+  const geo = new THREE.BufferGeometry();
+  const count = 3000;
+  const pos = new Float32Array(count * 3);
+  const cols = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    pos[i*3] = (Math.random() - 0.5) * 100;
+    pos[i*3+1] = (Math.random() - 0.5) * 60;
+    pos[i*3+2] = (Math.random() - 0.5) * 60;
+    const t = Math.random();
+    cols[i*3] = t > 0.5 ? 0 : 0;
+    cols[i*3+1] = t > 0.5 ? 0.83 : 1;
+    cols[i*3+2] = t > 0.5 ? 1 : 0.97;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+  const mat = new THREE.PointsMaterial({ size: 0.15, vertexColors: true, transparent: true, opacity: 0.6 });
+  const points = new THREE.Points(geo, mat);
+  scene.add(points);
+
+  // Grid lines
+  const gridGeo = new THREE.BufferGeometry();
+  const gridVerts = [];
+  for (let i = -10; i <= 10; i++) {
+    gridVerts.push(i * 5, -15, -30, i * 5, -15, 20);
+    gridVerts.push(-50, -15, i * 5, 50, -15, i * 5);
+  }
+  gridGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(gridVerts), 3));
+  const gridMat = new THREE.LineBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.08 });
+  scene.add(new THREE.LineSegments(gridGeo, gridMat));
+
+  let mouseX3 = 0, mouseY3 = 0;
+  document.addEventListener('mousemove', e => {
+    mouseX3 = (e.clientX / window.innerWidth - 0.5) * 2;
+    mouseY3 = (e.clientY / window.innerHeight - 0.5) * 2;
+  });
+
+  function animate() {
+    requestAnimationFrame(animate);
+    points.rotation.y += 0.001;
+    points.rotation.x += 0.0003;
+    camera.position.x += (mouseX3 * 3 - camera.position.x) * 0.05;
+    camera.position.y += (-mouseY3 * 2 - camera.position.y) * 0.05;
+    camera.lookAt(scene.position);
+    renderer.render(scene, camera);
+  }
+  animate();
+}
+
+// ============================================================
+// MOBILE NAV
+// ============================================================
+function toggleMobileNav() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+}
+function closeMobileNav() {
+  document.getElementById('mobile-nav').classList.remove('open');
+}
+
+// ============================================================
+// FORM SUBMIT
+// ============================================================
+
+
+// ============================================================
+// NAVBAR SCROLL EFFECT
+// ============================================================
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  if (window.scrollY > 50) {
+    nav.style.borderBottomColor = 'rgba(0,212,255,0.3)';
+    nav.style.boxShadow = '0 0 30px rgba(0,212,255,0.05)';
+  } else {
+    nav.style.borderBottomColor = 'rgba(0,212,255,0.15)';
+    nav.style.boxShadow = 'none';
+  }
+});
+
+// ============================================================
+// COUNTER ANIMATION
+// ============================================================
+function animateCounter(el, target, suffix = '') {
+  let current = 0;
+  const step = target / 50;
+  const timer = setInterval(() => {
+    current += step;
+    if (current >= target) { current = target; clearInterval(timer); }
+    el.textContent = Math.floor(current) + suffix;
+  }, 30);
+}
+
+const counterObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      document.querySelectorAll('.stat-num').forEach(el => {
+        const text = el.textContent;
+        const num = parseInt(text);
+        const suffix = text.replace(/[0-9]/g, '');
+        animateCounter(el, num, suffix);
+      });
+      counterObserver.disconnect();
+    }
+  });
+}, { threshold: 0.5 });
+const statsEl = document.querySelector('.about-stats');
+if (statsEl) counterObserver.observe(statsEl);
+
+// ============================================================
+// TYPEWRITER GLITCH EFFECT ON HERO EYEBROW
+// ============================================================
+function glitchText(el, finalText) {
+  const chars = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%';
+  let iterations = 0;
+  const interval = setInterval(() => {
+    el.textContent = finalText.split('').map((char, i) => {
+      if (i < iterations) return finalText[i];
+      return chars[Math.floor(Math.random() * chars.length)];
+    }).join('');
+    if (iterations >= finalText.length) clearInterval(interval);
+    iterations += 0.5;
+  }, 30);
+}
+
+setTimeout(() => {
+  const eyebrow = document.querySelector('.hero-eyebrow');
+  if (eyebrow) glitchText(eyebrow, '// Next-Gen Technology Solutions');
+}, 4500);
+
+// Sync replyto with email field
+document.getElementById('f-email').addEventListener('input', function() {
+  document.getElementById('f-replyto').value = this.value;
+});
+
+// ============================================================
+// BOOT
+// ============================================================
+window.addEventListener('load', runIntro);
+</script>
+</body>
+</html>
